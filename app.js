@@ -33,6 +33,8 @@ app.get("/", (req,res) => {
     res.render("landing");
 });
 
+// Who Wears Short Shorts??
+
 //INDEX - Show all islands
 app.get("/islands", (req,res)=>{
     // Get all islands from DB
