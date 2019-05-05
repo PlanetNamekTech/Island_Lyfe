@@ -121,4 +121,4 @@ app.post("/islands/:id/comments", (req,res)=>{
 
 app.listen(process.env.PORT, process.env.IP, () =>{
     console.log("The IslandLyfe server has started");
-};
+});

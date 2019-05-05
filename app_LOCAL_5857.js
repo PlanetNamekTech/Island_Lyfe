@@ -3,17 +3,10 @@ const express       = require('express'),
       bodyParser    = require('body-parser'),
       mongoose      = require('mongoose'),
       Island        = require("./models/island"),
-<<<<<<< HEAD
       Comment       = require("./models/comments"),
       seedDB        = require("./seeds");
       
 seedDB();
-=======
-      Comment       = require("./models/comments");
-    //   seedDB        = require("./seeds");
-      
-// seedDB();
->>>>>>> refs/remotes/origin/master
 mongoose.connect("mongodb://localhost:27017/island_lyfe", {useNewUrlParser: true});
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(__dirname + "/public"));
@@ -121,4 +114,4 @@ app.post("/islands/:id/comments", (req,res)=>{
 
 app.listen(process.env.PORT, process.env.IP, () =>{
     console.log("The IslandLyfe server has started");
-};
+});
