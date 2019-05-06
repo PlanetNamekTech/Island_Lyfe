@@ -3,23 +3,34 @@ const express       = require('express'),
       bodyParser    = require('body-parser'),
       mongoose      = require('mongoose'),
       Island        = require("./models/island"),
-<<<<<<< HEAD
-      Comment       = require("./models/comments"),
-      seedDB        = require("./seeds");
-      
-seedDB();
-=======
+      passport      = require('passport'),
+      LocalStrategy = require('passport-local'),
+      User          = require("./models/user"),
       Comment       = require("./models/comments");
-    //   seedDB        = require("./seeds");
+//       seedDB        = require("./seeds");
       
 // seedDB();
->>>>>>> refs/remotes/origin/master
 mongoose.connect("mongodb://localhost:27017/island_lyfe", {useNewUrlParser: true});
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
 
-    
+// PASSPORT CONFIGURATION
+app.use(require("express-session")({
+    secret: "I love tacos",
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use(function(req,res,next){
+    res.locals.currentUser = req.user;
+    next();
+});
 
 
         // {name: "Oahu", image: "https://cdn.pixabay.com/photo/2016/11/14/22/18/beach-1824855__480.jpg"},
@@ -38,7 +49,7 @@ app.get("/islands", (req,res)=>{
         if(err){
             console.log(err);
         } else {
-            res.render("islands/index",{islands: allIslands});
+            res.render("islands/index",{islands: allIslands, currentUser: req.user});
         }
     });
 });
@@ -85,7 +96,7 @@ app.get("/islands/:id", (req,res)=>{
 // ====================
 // COMMENTS ROUTES
 // ====================
-app.get("/islands/:id/comments/new", (req,res)=>{
+app.get("/islands/:id/comments/new", isLoggedIn, (req,res)=>{
     // Find island by ID
     Island.findById(req.params.id, (err, island)=>{
         if (err){
@@ -98,14 +109,14 @@ app.get("/islands/:id/comments/new", (req,res)=>{
 
 app.post("/islands/:id/comments", (req,res)=>{
     //Lookup island using ID
-    Island.findById(req.params.id, (err,island)=>{
+    Island.findById(req.params.id, isLoggedIn, (err,island)=>{
         if (err){
             console.log(err);
         } else {
                 //create new comment
             Comment.create(req.body.comment, (err, comment)=>{
                 if (err){
-                    console.log(err)
+                    console.log(err);
                 } else {
                     //connect new comment to island
                     island.comments.push(comment);
@@ -118,7 +129,53 @@ app.post("/islands/:id/comments", (req,res)=>{
     });
 });
 
+// ==============
+// AUTH ROUTES
+// ==============
+app.get("/register",(req,res)=>{
+    res.render("register");
+});
+
+// handle sign up logic
+app.post("/register",(req,res)=>{
+    var newUser = new User({username: req.body.username});
+   User.register(newUser, req.body.password, (err, user)=>{
+       if(err) {
+           console.log(err);
+           return res.render("register");
+       }
+       passport.authenticate("local")(req,res, function(){
+           res.redirect("/islands");
+       });
+   });
+});
+
+// show login form
+app.get("/login", (req,res)=>{
+    res.render("login");
+});
+// handling login logic
+app.post("/login",passport.authenticate("local", 
+    {
+        successRedirect: "/islands", 
+        failureRedirect: "/login"
+    }),
+        (req,res)=>{
+});
+
+// add logout route
+app.get("/logout", (req,res)=>{
+    req.logout();
+    res.redirect("/islands");
+});
+
+function isLoggedIn(req,res,next){
+    if(req.isAuthenticated()){
+        return next();
+    }
+    res.redirect("/login");
+}
 
 app.listen(process.env.PORT, process.env.IP, () =>{
     console.log("The IslandLyfe server has started");
-};
+});

@@ -1,5 +1,4 @@
 <% include ../partials/header %>
-<<<<<<< HEAD
 
 <div class="contatiner">
     <div class="row">
@@ -43,22 +42,4 @@
 </div>
 
 
-=======
-<h1><%= island.name %></h1>
-
-
-<img src= "<%= island.image %>">
-
-<p><%= island.description %></p>
-
-<p>
-    <a class="btn btn-success" href="/islands/<%= island._id %>/comments/new">Add New Comment</a>
-</p>
-
-<% island.comments.forEach ((comment)=>{ %>
-        <p>
-            <strong><%= comment.author %></strong> - <%= comment.text %>
-        </p>
-<% }) %>
->>>>>>> refs/remotes/origin/master
 <% include ../partials/footer %>
