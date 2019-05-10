@@ -7,7 +7,8 @@ const express       = require('express'),
       LocalStrategy = require('passport-local'),
       User          = require("./models/user"),
       Comment       = require("./models/comments"),
-      seedDB        = require("./seeds");
+      seedDB        = require("./seeds"),
+      methodOverride = require('method-override');
 
 // Requiring Routes
 var commentRoutes = require('./routes/comments'),
@@ -20,6 +21,7 @@ mongoose.connect("mongodb://localhost:27017/island_lyfe", {useNewUrlParser: true
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
+app.use(methodOverride("_method"));
 
 // PASSPORT CONFIGURATION
 app.use(require("express-session")({

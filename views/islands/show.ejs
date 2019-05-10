@@ -17,6 +17,13 @@
                     <h4 class="pull-right">$9.00/night</h4>
                     <h4><a><%= island.name %></a></h4>
                     <p><%= island.description %></p>
+                    <p><em>Submitted By </em><strong><%= island.author.username %></strong></p>
+                    <% if (currentUser && island.author.id.equals(currentUser._id)){ %>
+                        <a class="btn btn-warning btn-sm" href="/islands/<%= island._id %>/edit"><strong>Edit</strong></a>
+                        <form class="pull-right" id="delete-form" action="/islands/<%= island._id %>?_method=Delete" method="POST">
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    <% } %>
                 </div>
             </div>
             <div class="well">

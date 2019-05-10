@@ -4,8 +4,20 @@
 
 .thumbnail {
     padding:0;
+    margin-right: 10em;
 }
 
 .thumbnail caption-full {
-    padding:9px;
+    padding:2em;
+}
+
+.caption-full {
+    margin:1em;
+}
+.well {
+    margin-right:10em;
+}
+#delete-form {
+    display:inline;
+    float:left;
 }
