@@ -1,6 +1,7 @@
 var express = require('express'),
     router = express.Router(),
-    Island = require("../models/island");
+    Island = require("../models/island"),
+    middleware = require("../middleware");
 
 //INDEX - Show all islands
 router.get("/", (req,res)=>{
@@ -15,7 +16,7 @@ router.get("/", (req,res)=>{
 });
 
 //CREATE - Add new island to DB
-router.post("/", isLoggedIn,  (req,res) =>{
+router.post("/", middleware.isLoggedIn,  (req,res) =>{
     // get data from form and add to islands array
     var name = req.body.name;
     var image = req.body.image;
@@ -38,7 +39,7 @@ router.post("/", isLoggedIn,  (req,res) =>{
 });
 
 //NEW - Show form to create new island
-router.get("/new", isLoggedIn, (req,res) => {
+router.get("/new", middleware.isLoggedIn, (req,res) => {
    res.render("islands/new") ;
 });
 
@@ -58,7 +59,7 @@ router.get("/:id", (req,res)=>{
 });
 
 // EDIT ISLAND ROUTE
-router.get("/:id/edit", checkIslandOwenership, (req,res)=>{
+router.get("/:id/edit", middleware.checkIslandOwenership, (req,res)=>{
         // does user own island
      Island.findById(req.params.id, (err, foundIsland)=>{
          res.render("islands/edit", {island: foundIsland});
@@ -66,7 +67,7 @@ router.get("/:id/edit", checkIslandOwenership, (req,res)=>{
  });
 
 // UPDATE ISLAND ROUTE 
-router.put("/:id/", checkIslandOwenership, (req,res)=>{
+router.put("/:id/", middleware.checkIslandOwenership, (req,res)=>{
     // find and update correct island
     Island.findByIdAndUpdate(req.params.id, req.body.island, function(err, updatedIsland){
         if(err){
@@ -79,7 +80,7 @@ router.put("/:id/", checkIslandOwenership, (req,res)=>{
 });
 
 // DESTROY ISLAND ROUTE
-router.delete("/:id", checkIslandOwenership, (req,res)=>{
+router.delete("/:id", middleware.checkIslandOwenership, (req,res)=>{
     Island.findByIdAndRemove(req.params.id,(err)=>{
         if(err){
             res.redirect("/islands");
@@ -89,31 +90,4 @@ router.delete("/:id", checkIslandOwenership, (req,res)=>{
     });
 });
 
-// Middleware
-function isLoggedIn(req,res,next){
-    if(req.isAuthenticated()){
-        return next();
-    }
-    res.redirect("/login");
-}
-
-function checkIslandOwenership(req,res,next){
-    if(req.isAuthenticated()){
-        // does user own island?
-        
-        Island.findById(req.params.id, (err, foundIsland)=>{
-            if (err){
-                res.redirect("back");
-            } else {
-                // does user own island?
-                if(foundIsland.author.id.equals(req.user._id)){
-                    next();
-                } else {
-                    res.redirect("back");
-                }
-            }
-         });
-    } else {
-        res.redirect("back");
-    }}
 module.exports = router;

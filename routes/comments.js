@@ -1,10 +1,11 @@
 var express = require('express'),
     router = express.Router({mergeParams: true}),
     Island = require("../models/island"),
-    Comment = require("../models/comments");
+    Comment = require("../models/comments"),
+    middleware = require("../middleware");
     
 // Comments New
-router.get("/new", isLoggedIn, (req,res)=>{
+router.get("/new", middleware.isLoggedIn, (req,res)=>{
     // Find island by ID
     Island.findById(req.params.id, (err, island)=>{
         if (err){
@@ -16,9 +17,9 @@ router.get("/new", isLoggedIn, (req,res)=>{
 });
 
 // Comments Create
-router.post("/", (req,res)=>{
+router.post("/", middleware.isLoggedIn, (req,res)=>{
     //Lookup island using ID
-    Island.findById(req.params.id, isLoggedIn, (err,island)=>{
+    Island.findById(req.params.id, (err,island)=>{
         if (err){
             console.log(err);
         } else {
@@ -43,12 +44,38 @@ router.post("/", (req,res)=>{
     });
 });
 
-// Middleware
-function isLoggedIn(req,res,next){
-    if(req.isAuthenticated()){
-        return next();
-    }
-    res.redirect("/login");
-}
+// Edit
+router.get("/:comment_id/edit", middleware.checkCommentOwenership,  (req,res)=>{
+    Comment.findById(req.params.comment_id, (err, foundComment)=>{
+        if(err){
+            res.redirect("back");
+        } else {
+            res.render("comments/edit", {island_id: req.params.id, comment: foundComment}); 
+        }
+    });
+});
+
+// Comment Update
+router.put("/:comment_id", (req,res)=>{
+    Comment.findByIdAndUpdate(req.params.comment_id, req.body.comment, (err, updatedComment)=>{
+        if(err) {
+            res.redirect("back");
+        } else {
+            res.redirect("/islands/" + req.params.id);
+        }
+    });
+});
+
+// Comment Destroy
+router.delete("/:comment_id", middleware.checkCommentOwenership, (req,res)=>{
+    // findByIdAndRemove
+    Comment.findByIdAndRemove(req.params.comment_id, (err)=>{
+        if(err){
+            res.redirect("back");
+        } else {
+            res.redirect("/islands/" + req.params.id);
+        }
+    });
+});
 
 module.exports = router;

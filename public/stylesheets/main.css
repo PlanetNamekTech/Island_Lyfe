@@ -17,7 +17,14 @@
 .well {
     margin-right:10em;
 }
+
+.max {
+    max-height:45em;
+}
 #delete-form {
     display:inline;
-    float:left;
+}
+
+#delete-comment-form {
+    display:inline;
 }
