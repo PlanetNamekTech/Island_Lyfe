@@ -9,17 +9,20 @@ middlewareObj.checkIslandOwenership = function(req,res,next){
         // does user own island?
         Island.findById(req.params.id, (err, foundIsland)=>{
             if (err){
+                req.flash("error", "Island not found");
                 res.redirect("back");
             } else {
                 // does user own island?
                 if(foundIsland.author.id.equals(req.user._id)){
                     next();
                 } else {
+                    req.flash("error", "You don't have permission to do that");
                     res.redirect("back");
                 }
             }
          });
     } else {
+        req.flash("error", "You need to be logged in to do that");
         res.redirect("back");
     }};
 
@@ -34,11 +37,13 @@ middlewareObj.checkCommentOwenership = function(req,res,next){
                 if(foundComment.author.id.equals(req.user._id)){
                     next();
                 } else {
+                    req.flash("error", "You don't have permission to do that");
                     res.redirect("back");
                 }
             }
          });
     } else {
+        req.flash("error", "You need to be logged in to do that");
         res.redirect("back");
     }};
     
@@ -46,6 +51,7 @@ middlewareObj.isLoggedIn = function(req,res,next){
     if(req.isAuthenticated()){
         return next();
     }
+    req.flash("error", "You need to be logged in to do that");
     res.redirect("/login");
 };
 

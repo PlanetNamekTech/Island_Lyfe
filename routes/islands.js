@@ -19,13 +19,14 @@ router.get("/", (req,res)=>{
 router.post("/", middleware.isLoggedIn,  (req,res) =>{
     // get data from form and add to islands array
     var name = req.body.name;
+    var price = req.body.price;
     var image = req.body.image;
     var desc = req.body.description;
     var author = {
         id: req.user._id,
         username: req.user.username
     };
-    var newIsland = {name: name, image: image, description: desc, author: author};
+    var newIsland = {name: name, price: price, image: image, description: desc, author: author};
     // Create a new island and save to DB
     Island.create(newIsland, (err, newlyCreated)=>{
         if(err){

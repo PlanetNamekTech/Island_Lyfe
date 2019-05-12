@@ -73,6 +73,7 @@ router.delete("/:comment_id", middleware.checkCommentOwenership, (req,res)=>{
         if(err){
             res.redirect("back");
         } else {
+            req.flash("success", "Comment has been successfully removed");
             res.redirect("/islands/" + req.params.id);
         }
     });
