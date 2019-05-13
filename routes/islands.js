@@ -49,8 +49,9 @@ router.get("/new", middleware.isLoggedIn, (req,res) => {
 router.get("/:id", (req,res)=>{
     //Find the island with provided ID
     Island.findById(req.params.id).populate("comments").exec((err, foundIsland)=>{
-        if(err){
-            console.log(err);
+        if(err || !foundIsland){
+            req.flash('error', "Island not found");
+            res.redirect("back");
         } else {
                 console.log(foundIsland);
                //Render show template with that island

@@ -46,13 +46,20 @@ router.post("/", middleware.isLoggedIn, (req,res)=>{
 
 // Edit
 router.get("/:comment_id/edit", middleware.checkCommentOwenership,  (req,res)=>{
-    Comment.findById(req.params.comment_id, (err, foundComment)=>{
-        if(err){
-            res.redirect("back");
-        } else {
-            res.render("comments/edit", {island_id: req.params.id, comment: foundComment}); 
+    Island.findById(req.params.id, (err,foundIsland)=>{
+        if(err || !foundIsland){
+            req.flash("error", "Island does not exist");
+            return res.redirect("back");
         }
+        Comment.findById(req.params.comment_id, (err, foundComment)=>{
+            if(err){
+                res.redirect("back");
+            } else {
+                res.render("comments/edit", {island_id: req.params.id, comment: foundComment}); 
+            }
+        });
     });
+    
 });
 
 // Comment Update

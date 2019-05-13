@@ -8,7 +8,7 @@ middlewareObj.checkIslandOwenership = function(req,res,next){
     if(req.isAuthenticated()){
         // does user own island?
         Island.findById(req.params.id, (err, foundIsland)=>{
-            if (err){
+            if (err || !foundIsland){
                 req.flash("error", "Island not found");
                 res.redirect("back");
             } else {
@@ -30,7 +30,8 @@ middlewareObj.checkCommentOwenership = function(req,res,next){
     if(req.isAuthenticated()){
         // does user own comment?
         Comment.findById(req.params.comment_id, (err, foundComment)=>{
-            if (err){
+            if (err || !foundComment){
+                req.flash("error", "Comment not found");
                 res.redirect("back");
             } else {
                 // does user own island?
