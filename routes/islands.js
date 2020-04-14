@@ -2,6 +2,17 @@ var express = require('express'),
     router = express.Router(),
     Island = require("../models/island"),
     middleware = require("../middleware");
+    
+var NodeGeocoder = require('node-geocoder');
+ 
+var options = {
+  provider: 'google',
+  httpAdapter: 'https',
+  apiKey: process.env.GEOCODER_API_KEY,
+  formatter: null
+};
+ 
+var geocoder = NodeGeocoder(options);
 
 //INDEX - Show all islands
 router.get("/", (req,res)=>{
@@ -15,28 +26,60 @@ router.get("/", (req,res)=>{
     });
 });
 
-//CREATE - Add new island to DB
-router.post("/", middleware.isLoggedIn,  (req,res) =>{
-    // get data from form and add to islands array
-    var name = req.body.name;
-    var price = req.body.price;
-    var image = req.body.image;
-    var desc = req.body.description;
-    var author = {
-        id: req.user._id,
-        username: req.user.username
-    };
-    var newIsland = {name: name, price: price, image: image, description: desc, author: author};
+// //CREATE - Add new island to DB
+// router.post("/", middleware.isLoggedIn,  (req,res) =>{
+//     // get data from form and add to islands array
+//     var name = req.body.name;
+//     var price = req.body.price;
+//     var image = req.body.image;
+//     var desc = req.body.description;
+//     var author = {
+//         id: req.user._id,
+//         username: req.user.username
+//     };
+//     var newIsland = {name: name, price: price, image: image, description: desc, author: author};
+//     // Create a new island and save to DB
+//     Island.create(newIsland, (err, newlyCreated)=>{
+//         if(err){
+//             alert(err);
+//         } else {
+//                 //redirect back to islands page
+//                 res.redirect("/islands");
+//         }
+//     });
+
+// });
+
+//CREATE - add new island to DB
+router.post("/", middleware.isLoggedIn, function(req, res){
+  // get data from form and add to islands array
+  var name = req.body.name;
+  var image = req.body.image;
+  var desc = req.body.description;
+  var author = {
+      id: req.user._id,
+      username: req.user.username
+  };
+  geocoder.geocode(req.body.location, function (err, data) {
+    if (err || !data.length) {
+      req.flash('error', 'Invalid address');
+      return res.redirect('back');
+    }
+    var lat = data[0].latitude;
+    var lng = data[0].longitude;
+    var location = data[0].formattedAddress;
+    var newIsland = {name: name, image: image, description: desc, author:author, location: location, lat: lat, lng: lng};
     // Create a new island and save to DB
-    Island.create(newIsland, (err, newlyCreated)=>{
+    Island.create(newIsland, function(err, newlyCreated){
         if(err){
-            alert(err);
+            console.log(err);
         } else {
-                //redirect back to islands page
-                res.redirect("/islands");
+            //redirect back to islands page
+            console.log(newlyCreated);
+            res.redirect("/islands");
         }
     });
-
+  });
 });
 
 //NEW - Show form to create new island
@@ -69,16 +112,38 @@ router.get("/:id/edit", middleware.checkIslandOwenership, (req,res)=>{
  });
 
 // UPDATE ISLAND ROUTE 
-router.put("/:id/", middleware.checkIslandOwenership, (req,res)=>{
-    // find and update correct island
-    Island.findByIdAndUpdate(req.params.id, req.body.island, function(err, updatedIsland){
-        if(err){
-            res.redirect("/islands");
-        } else {
-            res.redirect("/islands/" + req.params.id);
-        }
-    });
-    // redirect to show page
+// router.put("/:id/", middleware.checkIslandOwenership, (req,res)=>{
+//     // find and update correct island
+//     Island.findByIdAndUpdate(req.params.id, req.body.island, function(err, updatedIsland){
+//         if(err){
+//             res.redirect("/islands");
+//         } else {
+//             res.redirect("/islands/" + req.params.id);
+//         }
+//     });
+// });
+
+//UPDATE ISLAND ROUTE
+ router.put("/:id", middleware.checkIslandOwnership, (req, res)=>{
+  geocoder.geocode(req.body.location, function (err, data) {
+     if (err || !data.length) {
+      req.flash('error', 'Invalid address');
+      return res.redirect('back');
+     } 
+     req.body.island.lat = data[0].latitude;
+     req.body.island.lng = data[0].longitude;
+     req.body.island.location = data[0].formattedAddress;
+
+     Island.findByIdAndUpdate(req.params.id, req.body.island, function(err, island){
+         if(err){
+             req.flash("error", err.message);
+             res.redirect("back");
+         } else {
+             req.flash("success","Successfully Updated!");
+             res.redirect("/islands/" + island._id);
+         }
+     });
+  });
 });
 
 // DESTROY ISLAND ROUTE

@@ -39,3 +39,8 @@
 #show {
     margin-right: 10em;
 }
+
+#map {
+    height: 400px;
+    width: 100%;
+}

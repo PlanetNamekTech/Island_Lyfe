@@ -4,7 +4,7 @@
     <div class="row">
 <h1 style="text-align: center;">Edit <%= island.name %></h1>
     <div style="width: 30%; margin: 30px auto;">
-        <form type="submit" action="/islands/<%= island._id %>?_method=PUT" Method="POST">
+        <form type="submit" action="/islands/<%= island._id %>?_method=PUT" method="POST">
             <div class="form-group">
                 <input class="form-control" type="text" name="island[name]" value="<%= island.name %>">
             </div>
@@ -16,6 +16,10 @@
             </div> 
             <div class="form-group">
                 <input class="form-control" type="text" name="island[description]" value="<%= island.description %>">
+            </div>
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input class="form-control" type="text" name="location" id="location" value="<%= island.location %>">
             </div>
             <div class="form-group">
                 <button class="btn btn-lg btn-primary btn-block">Submit!</button>
